@@ -59,32 +59,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Not found
-  sendJSON(res, 404, { error: 'Not Found' });
-});
-
-async function readJsonBody(req: http.IncomingMessage): Promise<any> {
-  return new Promise((resolve, reject) => {
-    let body = '';
-    req.on('data', (chunk) => (body += chunk));
-    req.on('end', () => {
-      if (!body) return resolve({});
-      try {
-        resolve(JSON.parse(body));
-      } catch (err) {
-        reject(err);
-      }
-    });
-    req.on('error', reject);
-  });
-}
-
-// Add subscription endpoints
-server.on('request', async (req, res) => {
-  const url = req.url || '/';
-  const method = req.method || 'GET';
-
-  if (url === '/subscription' && method === 'POST') {
+  // /subscription POST
+  if (url === '/subscription' && req.method === 'POST') {
     try {
       const body = await readJsonBody(req);
       const { phone_number, station_code, destination, notify_at } = body || {};
@@ -101,7 +77,8 @@ server.on('request', async (req, res) => {
     return;
   }
 
-  if (url === '/subscription' && method === 'PUT') {
+  // /subscription PUT
+  if (url === '/subscription' && req.method === 'PUT') {
     try {
       const body = await readJsonBody(req);
       const { id, phone_number, station_code, destination, notify_at } = body || {};
@@ -122,7 +99,8 @@ server.on('request', async (req, res) => {
     return;
   }
 
-  if (url.startsWith('/subscription') && method === 'DELETE') {
+  // /subscription DELETE
+  if (url.startsWith('/subscription') && req.method === 'DELETE') {
     try {
       const u = new URL(req.url || '', `http://localhost:${PORT}`);
       const idParam = u.searchParams.get('id');
@@ -141,7 +119,37 @@ server.on('request', async (req, res) => {
     }
     return;
   }
+
+  // /subscriptions GET - list all subscriptions
+  if (url === '/subscriptions' && req.method === 'GET') {
+    try {
+      const subscriptions = await listSubscriptions();
+      sendJSON(res, 200, { subscriptions });
+    } catch (err) {
+      sendJSON(res, 500, { error: err instanceof Error ? err.message : String(err) });
+    }
+    return;
+  }
+
+  // Not found
+  sendJSON(res, 404, { error: 'Not Found' });
 });
+
+async function readJsonBody(req: http.IncomingMessage): Promise<any> {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => (body += chunk));
+    req.on('end', () => {
+      if (!body) return resolve({});
+      try {
+        resolve(JSON.parse(body));
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on('error', reject);
+  });
+}
 
 // Start server when this module is executed directly
 if (import.meta.url === new URL(process.argv[1], 'file:').href) {
