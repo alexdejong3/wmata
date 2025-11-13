@@ -3,8 +3,10 @@ import { SSMClient, GetParameterCommand, GetParametersCommand } from "@aws-sdk/c
 export class SSMUtils { 
   private client: SSMClient;
 
-  constructor() {
-    this.client = new SSMClient({});
+  constructor(region?: string) {
+    this.client = new SSMClient({
+      region: region || 'us-east-1',
+    });
   }
 
   /**
