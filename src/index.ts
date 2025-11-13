@@ -9,26 +9,8 @@ import {
   listSubscriptions,
 } from './subscription.js';
 import { startWorker, stopWorker } from './worker.js';
-import { SSMUtils } from './ssm.js';
 
 console.log('Starting WMATA Metro Notification Service...');
-
-const parameterFetch = ['database/host', 'database/username', 'database/password', 'database/port'];
-
-interface DatabaseConfig {
-  dbHost?: string;
-  dbUsername?: string;
-  dbPassword?: string;
-  dbPort?: string;
-}
-
-const ssm = new SSMUtils();
-const databaseConfig: DatabaseConfig = {
-  dbHost: process.env.PGHOST || await ssm.getParameter('/database/host'),
-  dbUsername: process.env.PGUSER || await ssm.getParameter('/database/user'),
-  dbPassword: process.env.PGPASSWORD || await ssm.getParameter('/database/password'),
-  dbPort: process.env.PGPORT || await ssm.getParameter('/database/port'),
-};
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 
