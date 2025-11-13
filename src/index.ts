@@ -25,7 +25,7 @@ interface DatabaseConfig {
 const ssm = new SSMUtils();
 const databaseConfig: DatabaseConfig = {
   dbHost: process.env.PGHOST || await ssm.getParameter('/database/host'),
-  dbUsername: process.env.PGUSER || await ssm.getParameter('/database/username'),
+  dbUsername: process.env.PGUSER || await ssm.getParameter('/database/user'),
   dbPassword: process.env.PGPASSWORD || await ssm.getParameter('/database/password'),
   dbPort: process.env.PGPORT || await ssm.getParameter('/database/port'),
 };
